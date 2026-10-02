@@ -18,7 +18,7 @@ async function main(): Promise<void> {
       break;
     } catch (_err) {
       await new Promise((resolve) =>
-        setTimeout(resolve, Math.min(250, Math.max(0, deadline - Date.now())))
+        setTimeout(resolve, Math.min(250, Math.max(0, deadline - Date.now()))),
       );
     }
   }
