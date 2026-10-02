@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  packages: write
 
 jobs:
   check:
@@ -34,6 +35,14 @@ jobs:
         run: docker run -d --name my-project-ci -p 127.0.0.1:3000:3000 my-project:ci
       - name: Check container over HTTP
         run: node scripts/check-http.ts
+      - name: Publish checked image to GHCR
+        if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          printf '%s' "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          docker tag my-project:ci ghcr.io/denoro55/docker-test:latest
+          docker push ghcr.io/denoro55/docker-test:latest
       - name: Show container logs on failure
         if: failure()
         run: docker logs my-project-ci || true
